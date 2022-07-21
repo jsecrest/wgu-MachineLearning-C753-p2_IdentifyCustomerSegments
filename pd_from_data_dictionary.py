@@ -43,7 +43,7 @@ def get_attrib_names(desc_match: Match) -> List[str] | None:
     g = desc_match.group(ATTRIB_NAMES_GROUP_INDEX)
     if is_empty_group(g):
         return None
-    attrib_names_str = r"(?:\d\.\d\. )?(\w+)"
+    attrib_names_str = r"(?:\d+\.\d+\. )?(\w+)"
     attrib_names = re.findall(pattern=attrib_names_str, string=g)
     return attrib_names
 
@@ -146,8 +146,37 @@ def get_section_df(desc_match: Match[str]) -> DataFrame | None:
 
 
 # %%
-def next_match(desc_iter, verbose=True):
+def _next_match(desc_iter, verbose=True):
+    """
+    Function for testing
+    >>> section_df = _next_match(desc_iter, verbose=True)
+    """
     match = next(desc_iter)
+    section_df = get_section_df(match)
+    if verbose == True and section_df is not None:
+        # display(section_df)
+        # display(section_df.info())
+        # display(section_df.definition)
+        print(section_df.head())
+        print(section_df.loc[0, "allowed_values"])
+    return section_df
+
+    def compile_definition_df():
+        
+
+
+# %%
+if __name__ == "__main__":
+    from pprint import pprint
+
+    desc_iter = get_desc_iter()
+    # next(desc_iter)  # skip the empty Table Of Contents match
+    # _next_match(desc_iter)
+
+
+# %%
+for match in desc_iter:
+    verbose = True
     section_df = get_section_df(match)
     if verbose == True and section_df is not None:
         # display(section_df)
@@ -156,29 +185,9 @@ def next_match(desc_iter, verbose=True):
         # display(section_df.head())
         # section_df.head()
         # section_df.allowed_values
-        display(section_df.head())
-        display(section_df.loc[0, "allowed_values"])
+        print(section_df.head())
+        print(section_df.loc[0, "allowed_values"])
 
-    return section_df
-
-
-# %%
-if __name__ == "__main__":
-    from pprint import pprint
-
-    desc_iter = get_desc_iter()
-    next(desc_iter)  # skip the empty Table Of Contents match
-    # next_match(desc_iter)
-
-
-# %%
-for i in range(469):
-    print(i)
-    section_df = next_match(desc_iter, verbose=False)
-    print(f"previous: {section_df.attrib_names}")
-
-
-section_df = next_match(desc_iter, verbose=True)
 
 # %% [markdown]
 # Check out this MD
