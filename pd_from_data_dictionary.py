@@ -10,7 +10,7 @@ import IPython
 # %%
 
 DataFrame = type(pd.DataFrame())
-Series = type(pd.Series())
+Series = type(pd.Series(dtype="object"))
 
 FEATURE_NAMES_GROUP_INDEX = 1
 DEFINITION1_GROUP_INDEX = 2
@@ -226,34 +226,37 @@ class DataCodex:
         self.data_df: DataFrame = get_data_dict_as_df(data_dict_file)
         self.fsum_df: DataFrame = get_feature_summary_as_df(feat_summary_file)
 
-        display(self.fsum_df.head(2))
-        display(self.data_df.head(2))
-
         self.all_df: DataFrame = self.data_df.merge(
             self.fsum_df, how="left", on="feature_name"
         )
-
-        display(self.all_df.head(2))
         self.all_df.set_index(["feature_name"], inplace=True)
-        print("TEMP CHECK")  # TODO YOU ARE HERE
-        f_as_basic_s = self.all_df.xs("feature_name")
-        display(f_as_basic_s)
 
-    def get_feature_as_s(self, feature_name) -> Series:
-        f_as_basic_s = self.data_df.xs(feature_name)
+    def is_feature_in_data(self, feature_name) -> bool:
+        return feature_name in self.all_df.index.to_list()
+
+    def get_feature_as_s(self, feature_name) -> Series | None:
+        if self.is_feature_in_data(feature_name) == False:
+            return None
+        f_as_basic_s = self.all_df.xs(feature_name)
         allowed_values = f_as_basic_s.xs("codes").index.to_list()
         added_feature_name = pd.Series([feature_name], index=["feature_name"])
         added_value_summary = pd.Series([allowed_values], index=["allowed_values"])
         # todo: add feature summary info for missing value codes
         return pd.concat([added_feature_name, f_as_basic_s, added_value_summary])
 
-    def get_feature_as_df(self, feature_name) -> DataFrame:
+    def get_feature_as_df(self, feature_name) -> DataFrame | None:
+        if self.is_feature_in_data(feature_name) == False:
+            return None
         return self.get_feature_as_s(feature_name).to_frame()
 
-    def get_feature_as_dict(self, feature_name) -> Dict:
+    def get_feature_as_dict(self, feature_name) -> Dict | None:
+        if self.is_feature_in_data(feature_name) == False:
+            return None
         return self.get_feature_as_s(feature_name).to_dict()
 
     def nice_print_feature(self, feature_name) -> None:
+        if self.is_feature_in_data(feature_name) == False:
+            return None
         feature_dict = self.get_feature_as_dict(feature_name)
         for key, value in feature_dict.items():
             if key != "codes":
@@ -262,6 +265,8 @@ class DataCodex:
         print(feature_dict["codes"])
 
     def nice_display_feature(self, feature_name) -> None:
+        if self.is_feature_in_data(feature_name) == False:
+            return None
         s = self.get_feature_as_s(feature_name)
         partial_df = s.drop(index=["codes"]).to_frame()
         partial_df.index.name = "attribute"
@@ -287,13 +292,5 @@ if __name__ == "__main__":
     data_codex.nice_print_feature(feature_name)
     # %%
     data_codex.nice_display_feature(feature_name)
-
-# %%
-
-
-# %% [markdown]
-# Check out this MD
-# %%
-
 
 # %%
