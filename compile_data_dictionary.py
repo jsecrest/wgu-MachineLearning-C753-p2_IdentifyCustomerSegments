@@ -6,7 +6,7 @@ view of individual features"""
 import re
 from typing import Iterator, List, Match, Tuple, Dict
 import pandas as pd
-import IPython  ## needed for display to work
+import IPython  # needed for display to work
 
 __author__ = "Jason Secrest"
 
@@ -44,7 +44,7 @@ def _get_desc_iter(filepath: str) -> Iterator[Match[str]]:
 
 
 # %%
-def is_empty_group(group) -> bool:
+def _is_empty_group(group) -> bool:
     """determines if the result a match is empty
 
     Parameters
@@ -60,7 +60,7 @@ def is_empty_group(group) -> bool:
         return True
 
 
-def get_feature_names(desc_match: Match) -> List[str] | None:
+def _get_feature_names(desc_match: Match) -> List[str] | None:
     """return a list of feature names from the data dictionary
 
     Parameters
@@ -72,7 +72,7 @@ def get_feature_names(desc_match: Match) -> List[str] | None:
         List[str] : a list of feature names
     """
     feature_group = desc_match.group(FEATURE_NAMES_GROUP_INDEX)
-    if is_empty_group(feature_group):
+    if _is_empty_group(feature_group):
         return None
     feature_names_str = r"(?:\d+\.\d+\. )?(\w+)"
     section_no_str = r"(\d+\.\d+\.)"
@@ -85,7 +85,7 @@ def get_feature_names(desc_match: Match) -> List[str] | None:
     return feature_names, section_no
 
 
-def get_definition(desc_match: Match) -> List[str] | None:
+def _get_definition(desc_match: Match) -> List[str] | None:
     """extract the definition of this section of the data dictionary
 
     Parameters
@@ -97,7 +97,7 @@ def get_definition(desc_match: Match) -> List[str] | None:
         List[str] : a list of len 1 containing a string with the dictionary entry
     """
     def_group = desc_match.group(DEFINITION1_GROUP_INDEX)
-    if is_empty_group(def_group):
+    if _is_empty_group(def_group):
         return None
     def_lines_str = r"([^\n]*)\n"
     def_lines = re.findall(pattern=def_lines_str, string=def_group)
@@ -115,7 +115,7 @@ def get_codes(desc_match: Match) -> DataFrame | None:
         desc_match : a match object representing the features included in this feature section
     """
     match_group: str = desc_match.group(VALUES_GROUP_INDEX)
-    if is_empty_group(match_group):
+    if _is_empty_group(match_group):
         return None
     # get the VALUE and the VALUE_DESCRIPTION
     # from example line "-  2: very likely"
@@ -172,7 +172,7 @@ def get_codes(desc_match: Match) -> DataFrame | None:
     ]
 
 
-def get_dim_translate(desc_match: Match) -> List[str] | None:
+def _get_dim_translate(desc_match: Match) -> List[str] | None:
     """return a list of translation relevant to the dimensions of a feature section
     (Most features do not have a dimensional translation)
 
@@ -185,14 +185,14 @@ def get_dim_translate(desc_match: Match) -> List[str] | None:
         List[str] : a list of dimensional translations
     """
     desc_group = desc_match.group(DESCRIPTION2_GROUP_INDEX)
-    if is_empty_group(desc_group):
+    if _is_empty_group(desc_group):
         return None
     def_lines_str = r"- (\w*.+)\n?"
     dimensional_translations = re.findall(pattern=def_lines_str, string=desc_group)
     return dimensional_translations
 
 
-def get_section_df(desc_match: Match[str]) -> DataFrame | None:
+def _get_section_df(desc_match: Match[str]) -> DataFrame | None:
     """return a pandas DataFrame composed of the elements of a feature section in the
     data dictionary
 
@@ -204,11 +204,11 @@ def get_section_df(desc_match: Match[str]) -> DataFrame | None:
     # only try to process this match if it isn't the table of contents
     if re.match("### Table of Contents", desc_match.group(1)) is None:
         info_dict = {
-            "feature_name": get_feature_names(desc_match)[0],
-            "section_no": get_feature_names(desc_match)[1],
-            "definition": get_definition(desc_match),
+            "feature_name": _get_feature_names(desc_match)[0],
+            "section_no": _get_feature_names(desc_match)[1],
+            "definition": _get_definition(desc_match),
             "codes": get_codes(desc_match),
-            "dim_translation": get_dim_translate(desc_match),
+            "dim_translation": _get_dim_translate(desc_match),
         }
         col_count = len(info_dict["feature_name"])
         if col_count > 1:
@@ -231,7 +231,7 @@ def _next_match(desc_iter, verbose=False):
     section_df = None
     while section_df is None:
         match = next(desc_iter)
-        section_df = get_section_df(match)
+        section_df = _get_section_df(match)
         if verbose:
             if section_df is None:
                 print("Match does not contain feature data.")
@@ -244,12 +244,12 @@ def _next_match(desc_iter, verbose=False):
     return section_df
 
 
-def get_data_dict_as_df(filename) -> DataFrame:
+def _get_data_dict_as_df(filename) -> DataFrame:
     """converts the Data_Dictionary.md file into a dataframe"""
     data_df: DataFrame = None
     desc_iter = _get_desc_iter(filename)
     for match in desc_iter:
-        section_df = get_section_df(match)
+        section_df = _get_section_df(match)
         if section_df is not None:
             if data_df is None:
                 data_df = section_df
@@ -262,7 +262,7 @@ def get_data_dict_as_df(filename) -> DataFrame:
     return data_df
 
 
-def get_feature_summary_as_df(filepath) -> DataFrame:
+def _get_feature_summary_as_df(filepath) -> DataFrame:
     "converts the AZDIAS_Feature_Summary.csv file into a dataframe"
     fsum_df = pd.read_csv(filepath, sep=";")
     fsum_df = fsum_df.rename(columns={"attribute": "feature_name"})
@@ -285,12 +285,15 @@ class DataCodex:
 
     Methods
     -------
-        #### get information about the feature as a data structure
+        #### get list of feature names
+        - get_all_feature_names()
+
+        #### get information about a feature as a data structure
         - get_feature_as_s(self, feature_name) -> Series | None
         - get_feature_as_df(self, feature_name) : DataFrame | None
         - get_feature_as_dict(self, feature_name) -> Dict | None
 
-        ### print or display (in a notebook) information about the feature
+        ### print or display (in a notebook) information about a feature
         - nice_print_feature(self, feature_name) -> None
         - nice_display_feature(self, feature_name) -> None
 
@@ -298,8 +301,8 @@ class DataCodex:
     """
 
     def __init__(self, data_dict_file: str, feat_summary_file: str):
-        data_df: DataFrame = get_data_dict_as_df(data_dict_file)
-        feat_sum_df: DataFrame = get_feature_summary_as_df(feat_summary_file)
+        data_df: DataFrame = _get_data_dict_as_df(data_dict_file)
+        feat_sum_df: DataFrame = _get_feature_summary_as_df(feat_summary_file)
         self.all_df: DataFrame = data_df.merge(
             feat_sum_df, how="left", on="feature_name"
         )
@@ -309,6 +312,11 @@ class DataCodex:
         """returns a bool indicating whether the feature_name string appears in the
         documented data features"""
         return feature_name in self.all_df.index.to_list()
+
+    def get_all_feature_names(self) -> List[str]:
+        return self.all_df.index.to_list()
+
+    # METHODS FOR GETTING FEATURES
 
     def get_feature_as_s(self, feature_name) -> Series | None:
         """returns a pandas Series representation of all the attributes of this feature
@@ -334,6 +342,8 @@ class DataCodex:
         if self._is_feature_in_data(feature_name) is False:
             return None
         return self.get_feature_as_s(feature_name).to_dict()
+
+    # METHODS FOR DISPLAYING FEATURES
 
     def nice_print_feature(self, feature_name) -> None:
         """prints a text-console friendly representation of this feature"""
@@ -377,6 +387,9 @@ if __name__ == "__main__":
         data_dict_file="data/Data_Dictionary.md",
         feat_summary_file="data/AZDIAS_Feature_Summary.csv",
     )
+
+    print(data_codex.get_all_feature_names())
+
     FEATURE_TEST = "FINANZ_MINIMALIST"
     # %%
     data_codex.nice_print_feature(FEATURE_TEST)
