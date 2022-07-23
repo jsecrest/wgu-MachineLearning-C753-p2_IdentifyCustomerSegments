@@ -344,7 +344,7 @@ class DataCodex:
 
     # METHODS FOR DISPLAYING FEATURES
 
-    def nice_print_feature(self, feature_name) -> None:
+    def print_feature(self, feature_name) -> None:
         """prints a text-console friendly representation of this feature"""
         if self._is_feature_in_data(feature_name) is False:
             print(
@@ -357,7 +357,7 @@ class DataCodex:
         print("CODES:")
         print(feature_dict["codes"])
 
-    def nice_display_feature(self, feature_name) -> None:
+    def display_feature(self, feature_name) -> None:
         """displays a jupyter notebook friendly representation of this feature"""
 
         if self._is_feature_in_data(feature_name) is False:
@@ -391,7 +391,7 @@ if __name__ == "__main__":
 
     FEATURE_TEST = "FINANZ_MINIMALIST"
     # %%
-    data_codex.nice_print_feature(FEATURE_TEST)
+    data_codex.print_feature(FEATURE_TEST)
     # %%
     # comment the next line if not running as a jupyter notebook
     # data_codex.nice_display_feature(FEATURE_TEST)
