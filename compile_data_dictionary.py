@@ -280,14 +280,12 @@ class DataCodex:
 
     Attributes
     ----------
-        all_df : a dataframe representing both the data dictionary and feature summary
-            information for each feature
+        all_df {DataFrame} : a dataframe representing both the data
+            dictionary and feature summary information for each feature
+        feature_names {List[str]} : a list of feature names from `all_df`
 
     Methods
     -------
-        #### get list of feature names
-        - get_all_feature_names()
-
         #### get information about a feature as a data structure
         - get_feature_as_s(self, feature_name) -> Series | None
         - get_feature_as_df(self, feature_name) : DataFrame | None
@@ -308,13 +306,14 @@ class DataCodex:
         )
         self.all_df.set_index(["feature_name"], inplace=True)
 
-    def _is_feature_in_data(self, feature_name) -> bool:
-        """returns a bool indicating whether the feature_name string appears in the
-        documented data features"""
-        return feature_name in self.all_df.index.to_list()
-
-    def get_all_feature_names(self) -> List[str]:
+    @property
+    def feature_names(self) -> List[str]:
+        """return a list of features from all_df"""
         return self.all_df.index.to_list()
+
+    def _is_feature_in_data(self, feature_name) -> bool:
+        """returns a bool: True if the feature_name is in the features list"""
+        return feature_name in self.feature_names
 
     # METHODS FOR GETTING FEATURES
 
@@ -388,7 +387,7 @@ if __name__ == "__main__":
         feat_summary_file="data/AZDIAS_Feature_Summary.csv",
     )
 
-    print(data_codex.get_all_feature_names())
+    print(data_codex.feature_names)
 
     FEATURE_TEST = "FINANZ_MINIMALIST"
     # %%
