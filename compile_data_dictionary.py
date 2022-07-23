@@ -353,7 +353,7 @@ class DataCodex:
         feature_dict = self.get_feature_as_dict(feature_name)
         for key, value in feature_dict.items():
             if key != "codes":
-                print(f"{key:>15}: {value}")
+                print(f"{key:>20}: {value}")
         print("CODES:")
         print(feature_dict["codes"])
 
