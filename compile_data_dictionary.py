@@ -1,11 +1,14 @@
-#%%
+#!/usr/bin/env python3.10.4
+
 """uses Data_Dictionary.md and AZDIAS_Feature_Summary.csv to create a comprehensive
 view of individual features"""
 
 import re
 from typing import Iterator, List, Match, Tuple, Dict
 import pandas as pd
-import IPython
+import IPython  ## needed for display to work
+
+__author__ = "Jason Secrest"
 
 # %%
 
@@ -279,6 +282,19 @@ class DataCodex:
     ----------
         all_df : a dataframe representing both the data dictionary and feature summary
             information for each feature
+
+    Methods
+    -------
+        #### get information about the feature as a data structure
+        - get_feature_as_s(self, feature_name) -> Series | None
+        - get_feature_as_df(self, feature_name) : DataFrame | None
+        - get_feature_as_dict(self, feature_name) -> Dict | None
+
+        ### print or display (in a notebook) information about the feature
+        - nice_print_feature(self, feature_name) -> None
+        - nice_display_feature(self, feature_name) -> None
+
+
     """
 
     def __init__(self, data_dict_file: str, feat_summary_file: str):
