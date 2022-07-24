@@ -263,9 +263,22 @@ def _get_data_dict_as_df(filename) -> DataFrame:
 
 
 def _get_feature_summary_as_df(filepath) -> DataFrame:
-    "converts the AZDIAS_Feature_Summary.csv file into a dataframe"
+    """converts the AZDIAS_Feature_Summary.csv file into a dataframe and fixes values"""
     fsum_df: DataFrame = pd.read_csv(filepath, sep=";")
     fsum_df = fsum_df.rename(columns={"attribute": "feature_name"})
+
+    # convert list strings  (e.g. list_string : str = "[1,3,5]")
+    # into lists of strings (e.g  string_list : List[str] = ["1","3","5"])
+    def fix_missing_or_unknown(list_as_str: str):
+        list_of_str = list_as_str.strip("[]").split(",")
+        if list_of_str == [""]:
+            list_of_str = None
+        return list_of_str
+
+    fsum_df.loc[:, "missing_or_unknown"] = fsum_df.loc[:, "missing_or_unknown"].apply(
+        fix_missing_or_unknown
+    )
+
     return fsum_df
 
 
@@ -372,11 +385,14 @@ class DataCodex:
         partial_df.index.name = "attribute"
         partial_df.columns = ["value"]
         display(partial_df)
-
-        code_df = feature_s["codes"].to_frame()
-        code_df.index.name = "code"
-        code_df.columns = ["description"]
-        display(code_df)
+        code_df = feature_s["codes"]
+        if code_df is not None:
+            code_df = feature_s["codes"].to_frame()
+            code_df.index.name = "code"
+            code_df.columns = ["description"]
+            display(code_df)
+        else:
+            display("CODES: None")
 
 
 # %%
@@ -392,9 +408,8 @@ if __name__ == "__main__":
     # print(data_codex.feature_names)
     # %%
     FEATURE_TESTS = ["FINANZ_MINIMALIST", "ANZ_PERSONEN", "CAMEO_INTL_2015"]
-    data_codex.print_feature(FEATURE_TESTS[1])
+    for test in FEATURE_TESTS:
+        data_codex.print_feature(test)
+        ## for use in jupyter notebook or interactive python ##
+        data_codex.display_feature(test)
     # %%
-    # comment the next line if not running as a jupyter notebook
-    # data_codex.nice_display_feature(FEATURE_TEST)
-
-# %%
