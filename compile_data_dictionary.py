@@ -105,7 +105,7 @@ def _get_definition(desc_match: Match) -> List[str] | None:
     return [definition]
 
 
-def get_codes(desc_match: Match) -> DataFrame | None:
+def get_codes(desc_match: Match) -> [List[DataFrame] | None, List[str] | None]:
     """returns a pandas DataFrame containing codes strings and code definition strings.
     - Codes are the feature values from the data. A number or letter like "-1" or "W"
     - Code definitions are the meanings of the values.
@@ -116,7 +116,7 @@ def get_codes(desc_match: Match) -> DataFrame | None:
     """
     match_group: str = desc_match.group(VALUES_GROUP_INDEX)
     if _is_empty_group(match_group):
-        return None
+        return [None, None]
     # get the VALUE and the VALUE_DESCRIPTION
     # from example line "-  2: very likely"
     # value is 2, value_description is "very likely"
@@ -166,10 +166,9 @@ def get_codes(desc_match: Match) -> DataFrame | None:
         definitions.append(definition)
         # print(symbols, definitions)
 
-    return [
-        pd.Series(definitions, index=symbols, dtype="object")
-        # [symbols, definitions],
-    ]
+    codes_s = pd.Series(definitions, index=symbols, dtype="object")
+    allowed_values = codes_s.index.tolist()
+    return [[codes_s], [allowed_values]]
 
 
 def _get_dim_translate(desc_match: Match) -> List[str] | None:
@@ -207,9 +206,11 @@ def _get_section_df(desc_match: Match[str]) -> DataFrame | None:
             "feature_name": _get_feature_names(desc_match)[0],
             "section_no": _get_feature_names(desc_match)[1],
             "definition": _get_definition(desc_match),
-            "codes": get_codes(desc_match),
+            "codes": get_codes(desc_match)[0],
+            "allowed_values": get_codes(desc_match)[1],
             "dim_translation": _get_dim_translate(desc_match),
         }
+        # populate per feature lists, so lists are same length
         col_count = len(info_dict["feature_name"])
         if col_count > 1:
             # index 0 is already set, just need to fill remaining
@@ -218,6 +219,7 @@ def _get_section_df(desc_match: Match[str]) -> DataFrame | None:
                     raise ValueError("i is too large. i : {i}, col_count : {col_count}")
                 info_dict["definition"].append(info_dict["definition"][0])
                 info_dict["codes"].append(info_dict["codes"][0])
+                info_dict["allowed_values"].append(info_dict["allowed_values"][0])
         # if the dict didn't contain any columns return none
         out_df: pd.DataFrame() = None
         if col_count > 0:
@@ -317,7 +319,7 @@ class DataCodex:
         self.all_df: DataFrame = data_df.merge(
             feat_sum_df, how="left", on="feature_name"
         )
-        self.all_df.set_index(["feature_name"], inplace=True)
+        self.all_df.set_index(["feature_name"], inplace=True, drop=False)
 
     @property
     def feature_names(self) -> List[str]:
@@ -336,12 +338,7 @@ class DataCodex:
         if self._is_feature_in_data(feature_name) is False:
             return None
         raw_feature_s = self.all_df.xs(feature_name)
-        allowed_values = raw_feature_s.xs("codes")
-        if allowed_values is not None:
-            allowed_values = allowed_values.index.to_list()
-        added_feature_name = pd.Series([feature_name], index=["feature_name"])
-        added_value_summary = pd.Series([allowed_values], index=["allowed_values"])
-        return pd.concat([added_feature_name, raw_feature_s, added_value_summary])
+        return raw_feature_s
 
     def get_feature_as_df(self, feature_name) -> DataFrame | None:
         """returns a pandas DataFrame representation of all the attributes of this feature
@@ -400,7 +397,7 @@ if __name__ == "__main__":
 
     # testing
 
-    data_codex = DataCodex(
+    codex = DataCodex(
         data_dict_file="data/Data_Dictionary.md",
         feat_summary_file="data/AZDIAS_Feature_Summary.csv",
     )
@@ -409,7 +406,7 @@ if __name__ == "__main__":
     # %%
     FEATURE_TESTS = ["FINANZ_MINIMALIST", "ANZ_PERSONEN", "CAMEO_INTL_2015"]
     for test in FEATURE_TESTS:
-        data_codex.print_feature(test)
+        codex.print_feature(test)
         ## for use in jupyter notebook or interactive python ##
-        data_codex.display_feature(test)
+        codex.display_feature(test)
     # %%
