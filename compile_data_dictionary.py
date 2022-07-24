@@ -264,7 +264,7 @@ def _get_data_dict_as_df(filename) -> DataFrame:
 
 def _get_feature_summary_as_df(filepath) -> DataFrame:
     "converts the AZDIAS_Feature_Summary.csv file into a dataframe"
-    fsum_df = pd.read_csv(filepath, sep=";")
+    fsum_df: DataFrame = pd.read_csv(filepath, sep=";")
     fsum_df = fsum_df.rename(columns={"attribute": "feature_name"})
     return fsum_df
 
@@ -322,11 +322,13 @@ class DataCodex:
         (or None if it doesn't exist)"""
         if self._is_feature_in_data(feature_name) is False:
             return None
-        f_as_basic_s = self.all_df.xs(feature_name)
-        allowed_values = f_as_basic_s.xs("codes").index.to_list()
+        raw_feature_s = self.all_df.xs(feature_name)
+        allowed_values = raw_feature_s.xs("codes")
+        if allowed_values is not None:
+            allowed_values = allowed_values.index.to_list()
         added_feature_name = pd.Series([feature_name], index=["feature_name"])
         added_value_summary = pd.Series([allowed_values], index=["allowed_values"])
-        return pd.concat([added_feature_name, f_as_basic_s, added_value_summary])
+        return pd.concat([added_feature_name, raw_feature_s, added_value_summary])
 
     def get_feature_as_df(self, feature_name) -> DataFrame | None:
         """returns a pandas DataFrame representation of all the attributes of this feature
@@ -387,11 +389,10 @@ if __name__ == "__main__":
         feat_summary_file="data/AZDIAS_Feature_Summary.csv",
     )
 
-    print(data_codex.feature_names)
-
-    FEATURE_TEST = "FINANZ_MINIMALIST"
+    # print(data_codex.feature_names)
     # %%
-    data_codex.print_feature(FEATURE_TEST)
+    FEATURE_TESTS = ["FINANZ_MINIMALIST", "ANZ_PERSONEN", "CAMEO_INTL_2015"]
+    data_codex.print_feature(FEATURE_TESTS[1])
     # %%
     # comment the next line if not running as a jupyter notebook
     # data_codex.nice_display_feature(FEATURE_TEST)
