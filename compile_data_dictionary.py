@@ -326,7 +326,7 @@ class DataCodex:
         """return a list of features from all_df"""
         return self.all_df.index.to_list()
 
-    def _is_feature_in_data(self, feature_name) -> bool:
+    def is_feature_in_data(self, feature_name) -> bool:
         """returns a bool: True if the feature_name is in the features list"""
         return feature_name in self.feature_names
 
@@ -335,7 +335,7 @@ class DataCodex:
     def get_feature_as_s(self, feature_name) -> Series | None:
         """returns a pandas Series representation of all the attributes of this feature
         (or None if it doesn't exist)"""
-        if self._is_feature_in_data(feature_name) is False:
+        if self.is_feature_in_data(feature_name) is False:
             return None
         raw_feature_s = self.all_df.xs(feature_name)
         return raw_feature_s
@@ -343,14 +343,14 @@ class DataCodex:
     def get_feature_as_df(self, feature_name) -> DataFrame | None:
         """returns a pandas DataFrame representation of all the attributes of this feature
         (or None if it doesn't exist)"""
-        if self._is_feature_in_data(feature_name) is False:
+        if self.is_feature_in_data(feature_name) is False:
             return None
         return self.get_feature_as_s(feature_name).to_frame()
 
     def get_feature_as_dict(self, feature_name) -> Dict | None:
         """returns a dictionary representation of all the attributes of this feature
         (or None if it doesn't exist)"""
-        if self._is_feature_in_data(feature_name) is False:
+        if self.is_feature_in_data(feature_name) is False:
             return None
         return self.get_feature_as_s(feature_name).to_dict()
 
@@ -358,7 +358,7 @@ class DataCodex:
 
     def print_feature(self, feature_name) -> None:
         """prints a text-console friendly representation of this feature"""
-        if self._is_feature_in_data(feature_name) is False:
+        if self.is_feature_in_data(feature_name) is False:
             print(
                 f"The feature named '{feature_name}' does not appear in the data documentation"
             )
@@ -372,8 +372,8 @@ class DataCodex:
     def display_feature(self, feature_name) -> None:
         """displays a jupyter notebook friendly representation of this feature"""
 
-        if self._is_feature_in_data(feature_name) is False:
-            if self._is_feature_in_data(feature_name) is False:
+        if self.is_feature_in_data(feature_name) is False:
+            if self.is_feature_in_data(feature_name) is False:
                 display(
                     f"The feature named '{feature_name}' does not appear in the data documentation"
                 )
