@@ -120,7 +120,7 @@ def get_codes(desc_match: Match) -> [List[DataFrame] | None, List[str] | None]:
     # get the VALUE and the VALUE_DESCRIPTION
     # from example line "-  2: very likely"
     # value is 2, value_description is "very likely"
-    symbols_and_defs_str = r"- {1,2}(-?\d+): (.*)\n((?: {5}.*\n)*)"
+    symbols_and_defs_str = r"- {1,2}((?:-?\d+)?(?:[a-zA-Z])?): (.*)\n((?: {5}.*\n)*)"
     symbols_and_defs: List[Tuple(str, str)] | Tuple(str, str, str) = re.findall(
         symbols_and_defs_str, match_group
     )
