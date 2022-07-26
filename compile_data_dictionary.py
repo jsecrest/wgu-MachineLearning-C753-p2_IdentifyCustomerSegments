@@ -303,7 +303,7 @@ class DataCodex:
     -------
         #### get information about a feature as a data structure
         - get_feature_as_s(self, feature_name) -> Series | None
-        - get_feature_as_df(self, feature_name) : DataFrame | None
+        - get_feature_as_df(self, feature_name) -> DataFrame | None
         - get_feature_as_dict(self, feature_name) -> Dict | None
 
         ### print or display (in a notebook) information about a feature
