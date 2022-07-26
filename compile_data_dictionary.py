@@ -320,11 +320,24 @@ class DataCodex:
             feat_sum_df, how="left", on="feature_name"
         )
         self.all_df.set_index(["feature_name"], inplace=True, drop=False)
+        self.all_df = self.all_df.apply(self._trim_allowed_values, axis=1)
 
     @property
     def feature_names(self) -> List[str]:
         """return a list of features from all_df"""
         return self.all_df.index.to_list()
+
+    def _trim_allowed_values(self, feature_s: Series):
+        """intended to be applied to each feature to convert allowed_values
+        to a set that excludes missing values"""
+        allowed_values = feature_s.loc["allowed_values"]
+        missing_values = feature_s.loc["missing_or_unknown"]
+        if allowed_values and missing_values:
+            allowed_values_set = set(allowed_values)
+            missing_values_set = set(missing_values)
+            true_allowed_set = allowed_values_set.difference(missing_values_set)
+            feature_s.loc["allowed_values"] = true_allowed_set
+        return feature_s
 
     def is_feature_in_data(self, feature_name) -> bool:
         """returns a bool: True if the feature_name is in the features list"""
@@ -404,7 +417,14 @@ if __name__ == "__main__":
 
     # print(data_codex.feature_names)
     # %%
-    FEATURE_TESTS = ["FINANZ_MINIMALIST", "ANZ_PERSONEN", "CAMEO_INTL_2015"]
+    FEATURE_TESTS = [
+        "FINANZ_MINIMALIST",
+        "ANZ_PERSONEN",
+        "CAMEO_INTL_2015",
+        "OST_WEST_KZ",
+        "ANZ_HAUSHALTE_AKTIV",
+        "HH_EINKOMMEN_SCORE",
+    ]
     for test in FEATURE_TESTS:
         codex.print_feature(test)
         ## for use in jupyter notebook or interactive python ##
