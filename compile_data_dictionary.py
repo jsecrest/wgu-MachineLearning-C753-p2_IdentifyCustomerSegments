@@ -349,22 +349,18 @@ class DataCodex:
         """returns a pandas Series representation of all the attributes of this feature
         (or None if it doesn't exist)"""
         if self.is_feature_in_data(feature_name) is False:
-            return None
+            raise ValueError(f"'{feature_name}' is not in DataCodex.all_df")
         raw_feature_s = self.all_df.xs(feature_name)
         return raw_feature_s
 
     def get_feature_as_df(self, feature_name) -> DataFrame | None:
         """returns a pandas DataFrame representation of all the attributes of this feature
         (or None if it doesn't exist)"""
-        if self.is_feature_in_data(feature_name) is False:
-            return None
         return self.get_feature_as_s(feature_name).to_frame()
 
     def get_feature_as_dict(self, feature_name) -> Dict | None:
         """returns a dictionary representation of all the attributes of this feature
         (or None if it doesn't exist)"""
-        if self.is_feature_in_data(feature_name) is False:
-            return None
         return self.get_feature_as_s(feature_name).to_dict()
 
     # METHODS FOR DISPLAYING FEATURES
