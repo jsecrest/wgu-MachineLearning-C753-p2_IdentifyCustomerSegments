@@ -152,3 +152,4 @@ cython_debug/
 #.idea/
 data/Udacity_AZDIAS_Subset.csv
 data/Udacity_CUSTOMERS_Subset.csv
+data_process_points/azdias_preprocessed.csv
