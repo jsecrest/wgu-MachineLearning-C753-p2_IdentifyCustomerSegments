@@ -1,16 +1,24 @@
 # Tasks for resubmission
 
 ## JLS Misc
-- [ ] Last task! Copy this list from review1.md into the project before submitting.
-- [ ] Annotate the first cell with resubmission notes for reviewer conveniance
-- [ ] Remove "TODO" reference from submission (not mentioned by reviewer)
+- [ ] Last task! Copy this task list from `review1.md` into the project notebook before submitting.
+- [x] Annotate the first cell with resubmission notes for reviewer conveniance
+- [x] Remove "TODO" reference from submission (not mentioned by reviewer)
 
 ## **Required changes**
 
 ---
 ### Task group: *Evaluating missing rows*
-- [ ] You must create a distribution plot to identify the correct threshold to split the subset effectively. (see info in full review)
+- [x] "You must create a distribution plot to identify the correct threshold to split the subset effectively. (see info in full review)"
 
+#### Task completion notes:
+- [x] On review, I think I just need to clarify my decision and my existing plots. It
+looks like the way I layed things out was confusing. I also used a different method
+then the reviewer.
+- [x] I also tried the reviewer's method. If I'd have used it to start with it would have
+made my analysis a lot easier, but I think both approaches are valid. I reviewed my 
+method, added better notes, and added a justification for keeping my threshold. I also
+demonstrated an understanding of the reviewer's method.
 <details>
 
 ### Unmet requirement
@@ -26,10 +34,19 @@ It's not enough to just look at an arbitrary number of values or a ratio. The re
 
 ---
 ### Task group *Apply missing rows cleanup to customer data*
-- [ ] Kindly address the feedback provided in the following rubric (JLS - related to distribution plot for data splitting.)
+- [x] "Kindly address the feedback provided in the following rubric (JLS - related to distribution plot for data splitting.)"
+  
+#### Task completion notes:
+- [x] I kept my original method of separating the data and decided to keep my threshold.
+- [x] I double checked to be sure the threshold is applied to the customer data.
+  >```python
+  >rows_by_missing_s = cust_df.T.isna().sum()
+  >threshold = 8 #threshold is INCLUDED in the main data
+  >cust_df_main = cust_df.loc[rows_by_missing_s <= threshold]
+  >```
 
 <details>
-  
+
 ### Unmet requirement
 > A function applying pre-processing operations has been created, so that the same steps can be applied to the general and customer demographics alike.
 
@@ -44,57 +61,28 @@ Fix the issue in main data, then determine what to do with it in customer data.
 ---
 ### Task group *pick a kmeans cluster size*
 
-- [ ] You should increase the range of K if you struggle to find the elbow.
-- [ ] Try at least from K=2. Create one scree plot like this. Using this range, you might come up with an optimal number of centroids.
-- If KMeans take a longer time to fit, then you can go for 'minibatchkmeans’ to significantly reduce the fitting time. 
-  - JLS - process time was a big issue in my project,
-I might consider taking the time to implement minibatches. Considering this optional.) Alternatively,
-now that I have an idea of where the elbow is I can decrease my range and run the first 11 or so clusters.
+- [x] You should increase the range of K if you struggle to find the elbow.
+- [x] Try at least from K=2. Create one scree plot like this. Using this range, you might come up with an optimal number of centroids.
 
-#### ***NOTE FOR REVIEWER***: I'm a little confused on this one.
-I wonder if this section was *too* informative and maybe I confused my previous reviewer? See details in
-this collapsed section.
-
-<details>
-    <summary>Task notes and **Questions about previous feedback**</summary>
-
-## Question
-
-Did I misunderstand kmeans cluster selection? Or was my presentation confusing?
-
-## Requirement notes from last reviewer
-
-### Unmet requirement
-> Multiple cluster counts have been tested on the general demographics data, and the average point-centroid distances have been reported. A decision on the number of clusters to use is made and justified.
-
-#### Unmet sub-requirement
-> Multiple cluster counts have been tested on the general demographics data
-
-#### Notes
-> Due to the short-range defined for the “for” loop, the visualization does not arrive at any turning point/elbow.
-
-## Why I'm confused
-
-I had problems with running through several K means sections so my first section gives an example
-of the code I ran and the output, with a very small number of samples. Clearly this isn't enough to make
-a judgement on.
-
-![tiny runs screenshot](tiny-scree-plot-screenshot.png)
-
-Then I ran several more batches in sections, but I preserved the score information and deleted those code cells, so that I wouldn't have 5 or 6 of these to run every time I needed to rerun the full
-notebook. I noted the n_cluster/scores as a list, and then plotted those.
-
-![offline runs screenshot](big-scree-plot-screenshot.png)
-
-I might convert this to minibatches anyway if I can get the time, but I wanted to make 
-sure I'm not missing something. Is there something wrong with my graph/process or was this
-just confusion about where my data came from?
-
-</details>
+Completion Notes:
+- [x] I did this before, but I had to do it it lots of little personal batches and I can see why it didn't make sense. I've cleared out my notebook cells and am trying to do it with MiniBatchKMeans to see if that works better.
+- [x] Oh my goodness!!!! I love you for this suggestion! MiniBatchKMeans is amazing!!! 
+- [x] The elbow I chose in the last run still looks good! Now it's just easier to see it.
 
 ---
 ### Task group *Transform customer data with scalar object*
-- [ ] You didn't apply the scaler transformation
+- [x] You didn't apply the scaler transformation
+
+### Completion Notes
+- [x] Oops! Fixed:
+  >```python
+  >customers_main = std_scale.transform(customers_main)
+  >customers_pca = pca.transform(customers_main)
+  >customer_predict = k_means_6.predict(customers_pca) 
+  >```
+  I think this really threw off my results last time! Now that this is fixed I think
+  the missed section below should be after I update my analysis. I'll still throw in
+  a barchart to be closer to the requirement.
 
 <details>
   
@@ -111,13 +99,13 @@ just confusion about where my data came from?
 
 ---
 ### Task group **
-- [ ] Use a bar plot for this task. (JLS - see reviewer example in feedback)
+- [x] Use a bar plot for this task. (JLS - see reviewer example in feedback)
   > You have not performed the comparison of the data proportion in each cluster for the customer data to the proportion of data in each cluster for the general population
 
-- [ ] Describe customer segments
-  - [ ] Identify the clusters
-  - [ ] Inverse transform the data
-  - [ ] Describe the people represented by the inverse transform
+- [x] Describe customer segments
+  - [x] Identify the clusters
+  - [x] Inverse transform the data
+  - [x] Describe the people represented by the inverse transform
 
 <details>
   
@@ -201,7 +189,7 @@ for attribute, miss_index in zip(feat_info['attribute'], feat_info['missing_or_u
 
 ## Choosing a number of clusters for kmeans
 
-- [mini-batch kmeans](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MiniBatchKMeans.html)
+- [minibatch kmeans](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MiniBatchKMeans.html)
 
 
 ## Dealing with customer data
